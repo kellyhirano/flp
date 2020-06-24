@@ -1,0 +1,14 @@
+[Unit]
+Description=Run Pi FLP Weather Display
+Wants=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 -u weather.py
+WorkingDirectory=/home/pi/flp
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
