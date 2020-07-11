@@ -70,12 +70,9 @@ client.on_message = on_message
 client.connect(mqtt_host, mqtt_host_port, 60)
 
 while(1):
-    print('LOOP')
-    print(g_outside_temp)
     current_hour = int(time.strftime("%H", time.localtime()))
 
     if (current_hour >= 7 and current_hour <= 23 and g_outside_temp):
-        print('INSIDE')
 
         if (g_wind_gust >= 10):
             print('GUST: {}'.format(g_wind_gust))
@@ -103,7 +100,6 @@ while(1):
             flp.show()
             time.sleep(2)
 
-        print(g_outside_temp)
         flp.clear()
         flp.print_str('TEMP')
         flp.show()
