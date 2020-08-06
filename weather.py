@@ -9,6 +9,7 @@ import fourletterphat as flp
 # Global for data storage
 g_outside_temp = 0
 g_outside_temp_change = 0
+g_outside_24h_temp_change = 0
 g_last_day_rain = 0
 g_rain_rate = 0
 g_wind_gust = 0
@@ -30,6 +31,7 @@ def on_message(client, userdata, msg):
     """The callback for when a PUBLISH message is received from the server."""
     global g_outside_temp
     global g_outside_temp_change
+    global g_outside_24h_temp_change
     global g_last_day_rain
     global g_rain_rate
     global g_wind_gust
@@ -39,6 +41,7 @@ def on_message(client, userdata, msg):
 
     g_outside_temp = weather_data['outdoor_temperature']
     g_outside_temp_change = weather_data['outdoor_temp_change']
+    g_outside_24h_temp_change = weather_data['outdoor_24h_temp_change']
     g_last_day_rain = weather_data['last_day_rain']
     g_rain_rate = weather_data['rain_rate']
     g_wind_gust = weather_data['wind_gust']
@@ -115,6 +118,24 @@ while(1):
         flp.clear()
         flp.print_float(g_outside_temp, decimal_digits=1)
         flp.show()
+        time.sleep(2)
+        flp.clear()
+        flp.print_str('24H')
+        flp.show()
+        time.sleep(.5)
+        flp.clear()
+        flp.print_float(g_outside_24h_temp_change, decimal_digits=1)
+        flp.show()
+        time.sleep(2)
+        flp.clear()
+        flp.print_str('24H')
+        flp.show()
+        time.sleep(.5)
+        flp.clear()
+        flp.print_float(g_outside_temp, decimal_digits=1)
+        flp.show()
+        time.sleep(2)
+        flp.clear()
 
     # Give the main display a rest at night and show a blinky pattern
     else:
