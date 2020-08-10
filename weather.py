@@ -135,7 +135,6 @@ while(1):
         flp.print_float(g_outside_temp, decimal_digits=1)
         flp.show()
         time.sleep(2)
-        flp.clear()
 
     # Give the main display a rest at night and show a blinky pattern
     else:
