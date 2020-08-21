@@ -79,71 +79,72 @@ while(1):
     if (current_hour >= 7 and current_hour <= 23):
 
         if (aqi >= 100):
-            print('AQI: {}'.format(aqi))
-            flp.clear()
-            flp.print_str('AWI')
+            flp.print_str('AQI')
             flp.show()
             time.sleep(.5)
-            flp.clear()
+
             flp.print_number_str(aqi)
             flp.show()
-            time.sleep(2)
+            time.sleep(1)
 
         if (wind_gust >= 10):
-            print('GUST: {}'.format(wind_gust))
-            flp.clear()
             flp.print_str('GUST')
             flp.show()
             time.sleep(.5)
-            flp.clear()
+
             flp.print_number_str(wind_gust)
             flp.show()
-            time.sleep(2)
+            time.sleep(1)
 
         if (rain_rate > 0):
-            print('RAIN: {:.2f}h'.format(rain_rate))
-            flp.clear()
             flp.print_str('RAIN')
             flp.show()
             time.sleep(.5)
-            flp.clear()
+
             flp.print_str('RATE')
             flp.show()
             time.sleep(.5)
-            flp.clear()
+
             flp.print_float(rain_rate, decimal_digits=2)
             flp.show()
-            time.sleep(2)
+            time.sleep(1)
 
-        flp.clear()
         flp.print_str('TEMP')
         flp.show()
         time.sleep(.5)
-        flp.clear()
+
         flp.print_float(temp, decimal_digits=1)
         flp.show()
         time.sleep(2)
-        flp.clear()
+
+        flp.print_str('1H')
+        flp.show()
+        time.sleep(.5)
+
         flp.print_float(temp_change, decimal_digits=1)
         flp.show()
-        time.sleep(2)
-        flp.clear()
+        time.sleep(1)
+
+        flp.print_str('1H')
+        flp.show()
+        time.sleep(.5)
+
         flp.print_float(temp, decimal_digits=1)
         flp.show()
         time.sleep(2)
-        flp.clear()
+
         flp.print_str('24H')
         flp.show()
         time.sleep(.5)
-        flp.clear()
+
         flp.print_float(temp_change_24h, decimal_digits=1)
         flp.show()
-        time.sleep(2)
-        flp.clear()
+        time.sleep(1)
+
         flp.print_str('24H')
         flp.show()
         time.sleep(.5)
-        flp.clear()
+
         flp.print_float(temp, decimal_digits=1)
         flp.show()
 
