@@ -18,6 +18,7 @@ def on_connect(client, userdata, flags, rc):
     # reconnect then subscriptions will be renewed.
     client.subscribe([("weewx/sensor", 0),
                       ("purpleair/sensor", 0),
+                      ("purpleair/last_hour", 0),
                       ("awair/Family Room/sensor", 0),
                       ("awair/Master Bedroom/sensor", 0),
                       ("awair/Living Room/sensor", 0)])
@@ -72,8 +73,12 @@ while(1):
     wind_gust = g_mqtt_data['weewx/sensor']['wind_gust']
 
     aqi = 0
+    last_1hr_aqi = 0
     if ('purpleair/sensor' in g_mqtt_data):
         aqi = g_mqtt_data['purpleair/sensor']['st_aqi']
+
+    if ('purpleair/last_hour' in g_mqtt_data):
+        last_1hr_aqi = g_mqtt_data['purpleair/last_hour']['st_aqi']
 
     current_hour = int(time.strftime("%H", time.localtime()))
     if (current_hour >= 7 and current_hour <= 23):
@@ -84,6 +89,10 @@ while(1):
             time.sleep(.5)
 
             flp.print_number_str(aqi)
+            flp.show()
+            time.sleep(1)
+
+            flp.print_number_str(last_1hr_aqi)
             flp.show()
             time.sleep(1)
 
