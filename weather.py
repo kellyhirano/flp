@@ -47,6 +47,31 @@ def on_message(client, userdata, msg):
     flp.show()
 
 
+def display_message(titles, numbers, show_title_at_end=False,
+                    number_type='str', float_decimal_digits=1,
+                    number_sleep=1, title_sleep=.5):
+    """Display messaages with different timings for titles vs numbers."""
+
+    for title in titles:
+        flp.print_str(title)
+        flp.show()
+        time.sleep(title_sleep)
+
+    for number in numbers:
+        if (number_type == 'str'):
+            flp.print_number_str(number)
+        elif (number_type == 'float'):
+            flp.print_float(number, float_decimal_digits)
+        flp.show()
+        time.sleep(number_sleep)
+
+    if (show_title_at_end):
+        for title in titles:
+            flp.print_str(title)
+            flp.show()
+            time.sleep(title_sleep)
+
+
 config = configparser.ConfigParser()
 config.read('mqtt.conf')
 
@@ -57,8 +82,8 @@ client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.connect(mqtt_host, mqtt_host_port, 60)
-
+client.connect_async(mqtt_host, mqtt_host_port, 60)
+client.loop_start()
 
 while(1):
     if ('weewx/sensor' not in g_mqtt_data):
@@ -84,78 +109,27 @@ while(1):
     if (current_hour >= 7 and current_hour <= 23):
 
         if (aqi >= 100):
-            flp.print_str('AQI')
-            flp.show()
-            time.sleep(.5)
-
-            flp.print_number_str(aqi)
-            flp.show()
-            time.sleep(1)
-
-            flp.print_number_str(last_1hr_aqi)
-            flp.show()
-            time.sleep(1)
+            display_message(['AQI'], [aqi, last_1hr_aqi])
 
         if (wind_gust >= 10):
-            flp.print_str('GUST')
-            flp.show()
-            time.sleep(.5)
-
-            flp.print_number_str(wind_gust)
-            flp.show()
-            time.sleep(1)
+            display_message(['GUST'], [wind_gust])
 
         if (rain_rate > 0):
-            flp.print_str('RAIN')
-            flp.show()
-            time.sleep(.5)
+            display_message(['RAIN', 'RATE'], [rain_rate],
+                            number_type='float', float_decimal_digits=2)
 
-            flp.print_str('RATE')
-            flp.show()
-            time.sleep(.5)
+        display_message(['TEMP'], [temp],
+                        number_type='float', number_sleep=2)
 
-            flp.print_float(rain_rate, decimal_digits=2)
-            flp.show()
-            time.sleep(1)
+        display_message(['1H'], [temp_change],
+                        number_type='float', show_title_at_end=True)
 
-        flp.print_str('TEMP')
-        flp.show()
-        time.sleep(.5)
+        display_message([], [temp], number_type='float', number_sleep=2)
 
-        flp.print_float(temp, decimal_digits=1)
-        flp.show()
-        time.sleep(2)
+        display_message(['24H'], [temp_change_24h],
+                        number_type='float', show_title_at_end=True)
 
-        flp.print_str('1H')
-        flp.show()
-        time.sleep(.5)
-
-        flp.print_float(temp_change, decimal_digits=1)
-        flp.show()
-        time.sleep(1)
-
-        flp.print_str('1H')
-        flp.show()
-        time.sleep(.5)
-
-        flp.print_float(temp, decimal_digits=1)
-        flp.show()
-        time.sleep(2)
-
-        flp.print_str('24H')
-        flp.show()
-        time.sleep(.5)
-
-        flp.print_float(temp_change_24h, decimal_digits=1)
-        flp.show()
-        time.sleep(1)
-
-        flp.print_str('24H')
-        flp.show()
-        time.sleep(.5)
-
-        flp.print_float(temp, decimal_digits=1)
-        flp.show()
+        display_message([], [temp], number_type='float', number_sleep=0)
 
     # Give the main display a rest at night and show a blinky pattern
     else:
@@ -166,7 +140,6 @@ while(1):
             time.sleep(.1)
             flp.set_decimal(i, False)
             flp.show()
-        time.sleep(5)
+        time.sleep(8) # Total = 10s of sleep
 
-    client.loop()
-    time.sleep(5)
+    time.sleep(2)
