@@ -18,10 +18,7 @@ def on_connect(client, userdata, flags, rc):
     # reconnect then subscriptions will be renewed.
     client.subscribe([("weewx/sensor", 0),
                       ("purpleair/sensor", 0),
-                      ("purpleair/last_hour", 0),
-                      ("awair/Family Room/sensor", 0),
-                      ("awair/Master Bedroom/sensor", 0),
-                      ("awair/Living Room/sensor", 0)])
+                      ("purpleair/last_hour", 0)])
 
 
 def on_message(client, userdata, msg):
@@ -53,20 +50,20 @@ def display_message(titles, numbers, show_title_at_end=False,
     """Display messaages with different timings for titles vs numbers."""
 
     for title in titles:
+        flp.clear()
         flp.print_str(title)
         flp.show()
         time.sleep(title_sleep)
 
     for number in numbers:
-        if (number_type == 'str'):
-            flp.print_number_str(number)
-        elif (number_type == 'float'):
-            flp.print_float(number, float_decimal_digits)
+        flp.clear()
+        flp.print_number_str(str(number))
         flp.show()
         time.sleep(number_sleep)
 
     if (show_title_at_end):
         for title in titles:
+            flp.clear()
             flp.print_str(title)
             flp.show()
             time.sleep(title_sleep)
@@ -115,21 +112,17 @@ while(1):
             display_message(['GUST'], [wind_gust])
 
         if (rain_rate > 0):
-            display_message(['RAIN', 'RATE'], [rain_rate],
-                            number_type='float', float_decimal_digits=2)
+            display_message(['RAIN', 'RATE'], [rain_rate])
 
-        display_message(['TEMP'], [temp],
-                        number_type='float', number_sleep=2)
+        display_message(['TEMP'], [temp])
 
-        display_message(['1H'], [temp_change],
-                        number_type='float', show_title_at_end=True)
+        display_message(['1H'], [temp_change])
 
-        display_message([], [temp], number_type='float', number_sleep=2)
+        display_message([], [temp])
 
-        display_message(['24H'], [temp_change_24h],
-                        number_type='float', show_title_at_end=True)
+        display_message(['24H'], [temp_change_24h])
 
-        display_message([], [temp], number_type='float', number_sleep=0)
+        display_message([], [temp])
 
     # Give the main display a rest at night and show a blinky pattern
     else:
