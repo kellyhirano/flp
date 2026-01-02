@@ -1,18 +1,40 @@
 # flp
-A script designed to display weather information on a [Pimoroni Four Letter
-pHAT](https://shop.pimoroni.com/products/four-letter-phat). It's reading data from my local mqtt server that's using specific topic names. I need to clean up that code and will link to that as well.
+Scripts designed to display sensor information on a [Pimoroni Four Letter pHAT](https://shop.pimoroni.com/products/four-letter-phat). Data is read from a local MQTT server with specific topic names.
 
-A mqtt.conf file must be created. It's a standard configparser doc that must define a MQTT server and it's port (default port is 1883).
+## Scripts
+
+- **weather.py** - Displays weather and air quality data (temperature, AQI, wind, rain)
+- **energy.py** - Displays energy consumption data from a [Rainforest EAGLE-3](https://www.rainforestautomation.com/rfa-z114-eagle-3/) energy monitor
+
+## Setup
+
+A `mqtt.conf` file must be created with MQTT server settings:
+```ini
+[ALL]
+mqtt_host: <mqtt server ip>
+mqtt_host_port: 1883
+```
+
+Install dependencies:
 ```
 sudo apt-get install python3-pip
 sudo pip3 install -r requirements.txt
 ```
 
-### Running automatically on boot
+## Running automatically on boot
 
+### Weather display
 ```
 sudo cp etc/systemd/system/flp-weather.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable flp-weather
 sudo systemctl start flp-weather
+```
+
+### Energy display
+```
+sudo cp etc/systemd/system/flp-energy.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable flp-energy
+sudo systemctl start flp-energy
 ```

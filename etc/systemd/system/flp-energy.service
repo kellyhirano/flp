@@ -1,0 +1,14 @@
+[Unit]
+Description=Run Pi FLP Energy Display
+Wants=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 -u energy.py
+WorkingDirectory=/home/pi/flp
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
