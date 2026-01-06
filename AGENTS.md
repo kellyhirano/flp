@@ -9,9 +9,11 @@ This repository contains Python 3 display scripts for the Pimoroni Four Letter p
 - `requirements.txt`: runtime dependencies.
 
 ## Build, Test, and Development Commands
-- Install deps (on Raspberry Pi): `sudo pip3 install -r requirements.txt`.
+- Install OS deps (on Raspberry Pi): `sudo apt-get install -y $(cat apt.txt)`.
+- Install Python deps (venv): `python3 -m venv --system-site-packages venv && venv/bin/pip install -r requirements.txt`.
 - Run directly: `python3 weather.py` or `python3 energy.py`.
 - Enable service: `sudo cp etc/systemd/system/flp-weather.service /etc/systemd/system/` and `sudo systemctl enable --now flp-weather`.
+- Ansible deploy (from controller): `ansible-playbook -i /home/hirano/dev/ansible/inventory/pis /home/hirano/dev/ansible/playbooks/flp-deploy.yml --ask-vault-pass`.
 
 ## Coding Style & Naming Conventions
 - Python 3, 4-space indentation, snake_case for functions/modules, PascalCase for classes.
@@ -42,3 +44,4 @@ This repository contains Python 3 display scripts for the Pimoroni Four Letter p
 ## Configuration & Ops Notes
 - `mqtt.conf` is required and not tracked; document new keys in `README.md`.
 - Systemd units assume deployment on Raspberry Pi; update paths if installing elsewhere.
+- `apt.txt` includes `python3-smbus`; the venv must include system packages to see `smbus`.
