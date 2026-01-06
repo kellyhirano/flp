@@ -24,11 +24,21 @@ class EnergyDisplay(FlpMqttDisplay):
     @staticmethod
     def format_kw(value):
         """Format kW value for 4-char display (4 digits + decimal point)."""
-        if value < 10:
-            return f"{value:.3f}"
-        elif value < 100:
-            return f"{value:.2f}"
-        return f"{int(value)}"
+        if value < 0:
+            # Negative: minus sign takes 1 char, leaving 3 chars for digits
+            abs_value = abs(value)
+            if abs_value < 10:
+                return f"{value:.2f}"  # -X.XX (e.g., -0.04, -9.99)
+            elif abs_value < 100:
+                return f"{value:.1f}"  # -XX.X (e.g., -10.5, -99.9)
+            return f"{int(value)}"  # -XXX (e.g., -100, -999)
+        else:
+            # Positive: full 4 chars available for digits
+            if value < 10:
+                return f"{value:.3f}"
+            elif value < 100:
+                return f"{value:.2f}"
+            return f"{int(value)}"
 
     def display_loop_iteration(self):
         """Display energy metrics cycle."""
