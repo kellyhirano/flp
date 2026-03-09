@@ -17,9 +17,15 @@ class FlpMqttDisplay(ABC):
     ACTIVE_START_HOUR = 7
     ACTIVE_END_HOUR = 23
 
+    # Reconnection settings
+    RECONNECT_DELAY_SECS = 5
+    MAX_RECONNECT_DELAY_SECS = 300
+
     def __init__(self, config_file='mqtt.conf'):
         self.mqtt_data = {}
         self.client = None
+        self._connected = False
+        self._reconnect_delay = self.RECONNECT_DELAY_SECS
         self._load_config(config_file)
         self._setup_mqtt()
 
@@ -34,14 +40,29 @@ class FlpMqttDisplay(ABC):
         """Set up MQTT client with callbacks."""
         self.client = mqtt.Client()
         self.client.on_connect = self._on_connect
+        self.client.on_disconnect = self._on_disconnect
         self.client.on_message = self._on_message
 
     def _on_connect(self, client, userdata, flags, rc):
         """Callback for when the client receives a CONNACK from the server."""
-        print("Connected with result code " + str(rc))
-        # Subscribing in on_connect() means that if we lose the connection and
-        # reconnect then subscriptions will be renewed.
-        client.subscribe([(topic, 0) for topic in self.get_subscriptions()])
+        if rc == 0:
+            print("Connected to MQTT broker")
+            self._connected = True
+            self._reconnect_delay = self.RECONNECT_DELAY_SECS  # Reset delay on success
+            # Subscribing in on_connect() means that if we lose the connection and
+            # reconnect then subscriptions will be renewed.
+            client.subscribe([(topic, 0) for topic in self.get_subscriptions()])
+        else:
+            print(f"Connection failed with code {rc}")
+            self._connected = False
+
+    def _on_disconnect(self, client, userdata, rc):
+        """Callback for when the client disconnects from the server."""
+        self._connected = False
+        if rc != 0:
+            print(f"Unexpected disconnection (rc={rc}). Will auto-reconnect...")
+        else:
+            print("Disconnected from MQTT broker")
 
     def _on_message(self, client, userdata, msg):
         """Callback for when a PUBLISH message is received from the server."""
@@ -130,14 +151,43 @@ class FlpMqttDisplay(ABC):
         self.client.loop_start()
 
         while True:
-            if not self.has_required_data():
+            # Check connection status and show indicator if disconnected
+            if not self._connected:
+                self._show_disconnected()
                 time.sleep(5)
-                self.client.loop()
                 continue
 
-            if self.is_active_hours():
-                self.display_loop_iteration()
-            else:
-                self.show_night_pattern()
+            if not self.has_required_data():
+                self._show_waiting()
+                time.sleep(5)
+                continue
+
+            try:
+                if self.is_active_hours():
+                    self.display_loop_iteration()
+                else:
+                    self.show_night_pattern()
+            except Exception as e:
+                print(f"Display error: {e}")
+                self._show_error()
 
             time.sleep(2)
+
+    def _show_disconnected(self):
+        """Show disconnection indicator on display."""
+        flp.clear()
+        flp.print_str("DISC")
+        flp.show()
+
+    def _show_waiting(self):
+        """Show waiting indicator on display."""
+        flp.clear()
+        flp.print_str("WAIT")
+        flp.show()
+
+    def _show_error(self):
+        """Show error indicator on display."""
+        flp.clear()
+        flp.print_str("ERR")
+        flp.show()
+        time.sleep(2)
