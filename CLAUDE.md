@@ -44,7 +44,7 @@ The codebase uses a template method pattern:
 - `FlpMqttDisplay` (flp_base.py) - Abstract base class providing:
   - MQTT connection setup and message handling
   - Display utilities (`display_message()`, `show_night_pattern()`)
-  - Active hours logic (7 AM - 11 PM display, blinky pattern overnight)
+  - Active hours logic (6:30 AM - 10:30 PM display, blinky pattern overnight)
   - Main run loop with `loop_start()` for async MQTT
 
 - Subclasses implement three abstract methods:

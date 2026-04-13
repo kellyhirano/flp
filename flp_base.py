@@ -4,6 +4,8 @@
 import configparser
 import json
 import time
+import traceback
+import urllib.request
 from abc import ABC, abstractmethod
 
 import paho.mqtt.client as mqtt
@@ -13,9 +15,9 @@ import fourletterphat as flp
 class FlpMqttDisplay(ABC):
     """Base class for FLP displays that subscribe to MQTT topics."""
 
-    # Active display hours (7 AM to 11 PM)
-    ACTIVE_START_HOUR = 7
-    ACTIVE_END_HOUR = 23
+    # Active display hours (6:30 AM to 10:30 PM)
+    ACTIVE_START_MINUTES = 6 * 60 + 30   # 390
+    ACTIVE_END_MINUTES = 22 * 60 + 30    # 1350
 
     # Reconnection settings
     RECONNECT_DELAY_SECS = 5
@@ -26,6 +28,8 @@ class FlpMqttDisplay(ABC):
         self.client = None
         self._connected = False
         self._reconnect_delay = self.RECONNECT_DELAY_SECS
+        self._heartbeat_url = None
+        self._last_heartbeat = 0
         self._load_config(config_file)
         self._setup_mqtt()
 
@@ -35,6 +39,7 @@ class FlpMqttDisplay(ABC):
         config.read(config_file)
         self.mqtt_host = config.get('ALL', 'mqtt_host')
         self.mqtt_host_port = int(config.get('ALL', 'mqtt_host_port'))
+        self._heartbeat_url = config.get('ALL', 'heartbeat_url', fallback=None)
 
     def _setup_mqtt(self):
         """Set up MQTT client with callbacks."""
@@ -122,9 +127,12 @@ class FlpMqttDisplay(ABC):
 
     @staticmethod
     def is_active_hours():
-        """Check if current time is within active display hours."""
-        current_hour = int(time.strftime("%H", time.localtime()))
-        return FlpMqttDisplay.ACTIVE_START_HOUR <= current_hour <= FlpMqttDisplay.ACTIVE_END_HOUR
+        """Check if current time is within active display hours (6:30 AM - 10:30 PM)."""
+        now = time.localtime()
+        current_minutes = now.tm_hour * 60 + now.tm_min
+        return (FlpMqttDisplay.ACTIVE_START_MINUTES
+                <= current_minutes
+                < FlpMqttDisplay.ACTIVE_END_MINUTES)
 
     def has_required_data(self):
         """Check if the required MQTT topic has data."""
@@ -167,11 +175,25 @@ class FlpMqttDisplay(ABC):
                     self.display_loop_iteration()
                 else:
                     self.show_night_pattern()
+                self._ping_heartbeat()
             except Exception as e:
                 print(f"Display error: {e}")
+                traceback.print_exc()
                 self._show_error()
 
             time.sleep(2)
+
+    def _ping_heartbeat(self):
+        """Ping Uptime Kuma heartbeat URL at most once every 5 minutes."""
+        if not self._heartbeat_url:
+            return
+        now = time.time()
+        if now - self._last_heartbeat >= 300:
+            try:
+                urllib.request.urlopen(self._heartbeat_url, timeout=5)
+                self._last_heartbeat = now
+            except Exception:
+                pass
 
     def _show_disconnected(self):
         """Show disconnection indicator on display."""

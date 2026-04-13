@@ -34,7 +34,7 @@ This repository contains Python 3 display scripts for the Pimoroni Four Letter p
 
 ## Testing Guidelines
 - No automated tests; validate on real hardware.
-- Manual checks: verify MQTT subscriptions, active-hours behavior (7 AM–11 PM), and display cycling.
+- Manual checks: verify MQTT subscriptions, active-hours behavior (6:30 AM–10:30 PM), and display cycling.
 
 ## Commit & Pull Request Guidelines
 - Use short, imperative commit summaries (e.g., “Add energy service”, “Refactor display loop”).
