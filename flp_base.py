@@ -12,6 +12,29 @@ import paho.mqtt.client as mqtt
 import fourletterphat as flp
 
 
+class _I2CBusCompat:
+    """Send zero-length block writes as a single command byte.
+
+    fourletterphat 0.1.0 sends HT16K33 commands as
+    write_i2c_block_data(addr, cmd, []); Linux 6.18.60+ rejects that with
+    EINVAL. write_byte(addr, cmd) puts the same byte on the wire.
+    """
+
+    def __init__(self, bus):
+        self._bus = bus
+
+    def write_i2c_block_data(self, addr, cmd, vals, *args):
+        if not vals:
+            return self._bus.write_byte(addr, cmd)
+        return self._bus.write_i2c_block_data(addr, cmd, vals, *args)
+
+    def __getattr__(self, name):
+        return getattr(self._bus, name)
+
+
+flp.bus = _I2CBusCompat(flp.bus)
+
+
 class FlpMqttDisplay(ABC):
     """Base class for FLP displays that subscribe to MQTT topics."""
 
