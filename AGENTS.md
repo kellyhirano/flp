@@ -84,4 +84,4 @@ mqtt_host_port: 1883
 - Document new keys in `README.md`.
 - Systemd units assume deployment on Raspberry Pi; update paths if installing elsewhere. Copy to `/etc/systemd/system/` and enable with systemctl.
 - `apt.txt` includes `python3-smbus` (required for I2C hardware access); the venv must include system packages (`--system-site-packages`) to see `smbus`.
-- Linux 6.18.60+ rejects zero-length I2C block writes (`EINVAL`), which `fourletterphat` 0.1.0 uses for HT16K33 commands. `flp_base.py` wraps `flp.bus` (`_I2CBusCompat`) to send them as `write_byte`. Don't remove it (outage 2026-11-12/13: every FLP service crash-looped after the kernel update).
+- On Raspberry Pi OS kernel `6.18.60+rpt` (introducing change not identified), zero-length I2C block writes fail with `EINVAL`; `fourletterphat` 0.1.0 uses them for HT16K33 commands. `flp_base.py` wraps `flp.bus` (`_I2CBusCompat`) to send them as `write_byte`. Don't remove it (outage 2026-11-12/13: every FLP service crash-looped after the kernel update).
