@@ -42,12 +42,17 @@ class FlpMqttDisplay(ABC):
     ACTIVE_START_MINUTES = 6 * 60 + 30   # 390
     ACTIVE_END_MINUTES = 22 * 60 + 30    # 1350
 
+    # Required data older than this is treated as missing: the display shows
+    # the waiting indicator and the heartbeat stops. Subclasses override.
+    STALE_AFTER_SECS = 20 * 60
+
     # Reconnection settings
     RECONNECT_DELAY_SECS = 5
     MAX_RECONNECT_DELAY_SECS = 300
 
     def __init__(self, config_file='mqtt.conf'):
         self.mqtt_data = {}
+        self._received_at = {}
         self.client = None
         self._connected = False
         self._reconnect_delay = self.RECONNECT_DELAY_SECS
@@ -97,6 +102,7 @@ class FlpMqttDisplay(ABC):
         print(msg.topic + " -> " + str(msg.payload.decode('UTF-8')))
         message_data = json.loads(str(msg.payload.decode('UTF-8')))
         self.mqtt_data[msg.topic] = message_data
+        self._received_at[msg.topic] = time.monotonic()
         self._flash_decimal()
 
     def _flash_decimal(self):
@@ -158,8 +164,10 @@ class FlpMqttDisplay(ABC):
                 < FlpMqttDisplay.ACTIVE_END_MINUTES)
 
     def has_required_data(self):
-        """Check if the required MQTT topic has data."""
-        return self.get_required_topic() in self.mqtt_data
+        """Check if the required MQTT topic has recent data."""
+        received = self._received_at.get(self.get_required_topic())
+        return (received is not None
+                and time.monotonic() - received <= self.STALE_AFTER_SECS)
 
     @abstractmethod
     def get_subscriptions(self):

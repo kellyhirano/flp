@@ -15,6 +15,8 @@ class EnergyDisplay(FlpMqttDisplay):
         "rainforest/peak",
     ]
 
+    STALE_AFTER_SECS = 5 * 60  # rainforest/load publishes every 3 s
+
     def get_subscriptions(self):
         return self.SUBSCRIPTIONS
 
